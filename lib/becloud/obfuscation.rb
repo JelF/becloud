@@ -1,16 +1,21 @@
 # frozen_string_literal: true
 
-require 'sequel'
 require 'becloud/config'
+require 'becloud/sequel'
+require 'becloud/target_preparation'
 
 module Becloud::Obfuscation
 
   def self.obfuscate(config_path)
     config = Becloud::Config.load_config(config_path)
+    source_db_name = config.source_db_name
 
-    Sequel.connect(config.source) do |source|
-      Sequel.connect(config.target) do |target|
-        require 'pry'; binding.pry
+    # TODO Support all source db connection params (host, username, password, etc...)
+    Becloud::Sequel.connect(source_db_name) do |source_db|
+      target_db_name = config.target_db_name
+
+      Becloud::TargetPreparation.with_prepared_target(source_db_name, target_db_name) do |target_db|
+        # TODO
       end
     end
   end

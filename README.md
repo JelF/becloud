@@ -1,3 +1,3 @@
 # Becloud
 
-Data obfuscation for Postgres
+Data obfuscation for Postgres. Not production-ready
