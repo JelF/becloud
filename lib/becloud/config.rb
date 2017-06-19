@@ -9,19 +9,19 @@ module Becloud::Config
       self
     end
 
-    def source_db(**opts)
+    def source(**opts)
       if opts.empty?
-        @source_db
+        @source
       else
-        @source_db = opts
+        @source = opts
       end
     end
 
-    def destination_db(**opts)
+    def target(**opts)
       if opts.empty?
-        @destination_db
+        @target
       else
-        @destination_db = opts
+        @target = opts
       end
     end
   end
