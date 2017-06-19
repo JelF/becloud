@@ -1,2 +1,11 @@
 Style/Documentation:
   Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false

@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'becloud'
+require 'bundler/setup'
+require 'becloud/obfuscation'
+
+Becloud::Obfuscation.run
