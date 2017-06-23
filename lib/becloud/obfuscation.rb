@@ -46,9 +46,11 @@ module Becloud::Obfuscation
         table_foreign_keys = foreign_keys[table] || []
         obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys)
 
-        source_db[table].each do |row|
-          obfuscated_row = obfuscator.obfuscate_row(row)
-          target_db[table].insert(obfuscated_row)
+        Becloud::Sequel.read_in_batches(source_db, table) do |batch|
+          batch.each do |row|
+            obfuscated_row = obfuscator.obfuscate_row(row)
+            target_db[table].insert(obfuscated_row)
+          end
         end
       end
     end
