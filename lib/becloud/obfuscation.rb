@@ -35,9 +35,10 @@ module Becloud::Obfuscation
 
     # TODO Obfuscation config
     # TODO Memory usage
-    # TODO Threads
+    # TODO Threads (parallel tables? parallel table content?)
     # TODO Raise if foreign keys are to be obfuscated (both sides)
     # TODO Foreign key passing is not required if raising on foreign key obfuscation requests?
+    # TODO Copy tables which do not need obfuscation
     def populate_target_db(source_db, target_db)
       foreign_keys = Becloud::DBUtils.foreign_keys(source_db)
 
@@ -47,10 +48,8 @@ module Becloud::Obfuscation
         obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys)
 
         Becloud::Sequel.read_in_batches(source_db, table) do |batch|
-          batch.each do |row|
-            obfuscated_row = obfuscator.obfuscate_row(row)
-            target_db[table].insert(obfuscated_row)
-          end
+          obfuscated_rows = batch.map { |row| obfuscator.obfuscate_row(row) }
+          target_db[table].multi_insert(obfuscated_rows)
         end
       end
     end
