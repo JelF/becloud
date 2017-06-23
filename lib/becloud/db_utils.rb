@@ -12,9 +12,9 @@ module Becloud::DBUtils
       dump_path = Tempfile.new.path
 
       run("pg_dump -s #{source_db_name} > #{dump_path}")
-      run("dropdb --if-exists #{target_db_name}")
-      run("createdb #{target_db_name}")
-      run("psql #{target_db_name} < #{dump_path}")
+      run("dropdb --if-exists #{target_db_name} > /dev/null")
+      run("createdb #{target_db_name} > /dev/null")
+      run("psql #{target_db_name} < #{dump_path} > /dev/null")
     end
 
     def foreign_keys(db)
