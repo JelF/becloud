@@ -13,11 +13,13 @@ class Becloud::RowObfuscator
   DECIMAL_LEFT_DIGITS = 3
   NULL_CHANCE         = 0.1
 
-  def initialize(metadata, foreign_keys)
-    @metadata     = metadata
-    @foreign_keys = foreign_keys
+  def initialize(metadata, foreign_keys, unique_indices)
+    @metadata       = metadata
+    @foreign_keys   = foreign_keys
+    @unique_indices = unique_indices
   end
 
+  # TODO Handle unique indices
   def obfuscate_row(row)
     row.map do |column, value|
       next [column, value] if foreign_keys.include?(column)
@@ -40,6 +42,7 @@ class Becloud::RowObfuscator
 
   attr_reader :metadata
   attr_reader :foreign_keys
+  attr_reader :unique_indices
 
   # TODO Support varchar with upper limit
   # TODO Support numeric with parameters

@@ -3,11 +3,11 @@
 require 'becloud/config'
 require 'becloud/sequel'
 require 'becloud/db_utils'
-require 'becloud/row_obfuscation'
+require 'becloud/row_obfuscator'
+require 'becloud/unique_index_resolving'
 
 # TODO Source db might change while obfuscating
 # TODO Rewind sequences after obfuscation
-# TODO Unique constraints
 
 module Becloud::Obfuscation
 
@@ -39,13 +39,15 @@ module Becloud::Obfuscation
     # TODO Raise if foreign keys are to be obfuscated (both sides)
     # TODO Foreign key passing is not required if raising on foreign key obfuscation requests?
     # TODO Copy tables which do not need obfuscation
+    # TODO Unique expression constraints
     def populate_target_db(source_db, target_db)
       foreign_keys = Becloud::DBUtils.foreign_keys(source_db)
 
       source_db.tables.each do |table|
         metadata = source_db.schema(table).to_h
         table_foreign_keys = foreign_keys[table] || []
-        obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys)
+        table_unique_indices = Becloud::UniqueIndexResolving.resolve_indices(source_db, table)
+        obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys, table_unique_indices)
 
         Becloud::Sequel.read_in_batches(source_db, table) do |batch|
           obfuscated_rows = batch.map { |row| obfuscator.obfuscate_row(row) }
