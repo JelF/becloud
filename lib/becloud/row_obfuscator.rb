@@ -2,6 +2,7 @@
 
 require 'faker'
 require 'json'
+require 'set'
 require 'sequel/extensions/pg_array'
 require 'sequel/extensions/pg_hstore'
 
@@ -14,28 +15,35 @@ class Becloud::RowObfuscator
   NULL_CHANCE         = 0.1
 
   def initialize(metadata, foreign_keys, unique_indices)
-    @metadata       = metadata
-    @foreign_keys   = foreign_keys
-    @unique_indices = unique_indices
+    @metadata                = metadata
+    @foreign_keys            = foreign_keys
+    @unique_indices          = unique_indices
+    # TODO Only store value hashes
+    @unique_generated_values = {}
   end
 
-  # TODO Handle unique indices
+  # TODO Refactor
+  # TODO Comments
   def obfuscate_row(row)
-    row.map do |column, value|
-      next [column, value] if foreign_keys.include?(column)
-      next [column, nil] if metadata[column][:allow_null] && rand < NULL_CHANCE
+    new_row = {}
 
-      type = metadata[column][:db_type]
-      if type.end_with?('[]')
-        type = type.tr('[]', '')
-        array = [obfuscate_value(type), obfuscate_value(type)]
-        value = Sequel.pg_array(array, type)
-      else
-        value = obfuscate_value(type)
+    unique_indices.each do |columns|
+      # TODO Can loop forever
+      loop do
+        attributes = columns.map { |column| [column, obfuscate_column(column, row[column])] }.to_h
+        unless unique_generated_values_for(columns).include?(attributes)
+          unique_generated_values_for(columns) << attributes
+          new_row.merge!(attributes)
+          break
+        end
       end
+    end
 
-      [column, value]
-    end.to_h
+    (row.keys - unique_indices.flatten).each do |column|
+      new_row.merge!(column => obfuscate_column(column, row[column]))
+    end
+
+    new_row
   end
 
   private
@@ -43,6 +51,21 @@ class Becloud::RowObfuscator
   attr_reader :metadata
   attr_reader :foreign_keys
   attr_reader :unique_indices
+  attr_reader :unique_generated_values
+
+  def obfuscate_column(column, value)
+    return value if foreign_keys.include?(column)
+    return if metadata[column][:allow_null] && rand < NULL_CHANCE
+
+    type = metadata[column][:db_type]
+    if type.end_with?('[]')
+      type  = type.tr('[]', '')
+      array = [obfuscate_value(type), obfuscate_value(type)]
+      Sequel.pg_array(array, type)
+    else
+      obfuscate_value(type)
+    end
+  end
 
   # TODO Support varchar with upper limit
   # TODO Support numeric with parameters
@@ -54,8 +77,7 @@ class Becloud::RowObfuscator
     when /numeric.*/
       Faker::Number.decimal(3)
     when /character varying.*/
-      # TODO Replace with lorem ipsum word once unique indices are supported
-      Faker::Lorem.characters(CHARACTER_COUNT)
+      Faker::Lorem.words(2).join(' ')
     when 'text'
       Faker::Lorem.sentence
     when 'timestamp without time zone'
@@ -73,5 +95,9 @@ class Becloud::RowObfuscator
     else
       raise "Unsupported column type: #{type}"
     end
+  end
+
+  def unique_generated_values_for(columns)
+    unique_generated_values[columns] ||= Set.new
   end
 end
