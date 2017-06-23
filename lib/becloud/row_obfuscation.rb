@@ -11,15 +11,16 @@ module Becloud::RowObfuscation
   DAYS_BACK_IN_TIME   = 4_000
   CHARACTER_COUNT     = 20
   DECIMAL_LEFT_DIGITS = 3
+  NULL_CHANCE         = 0.1
 
   class << self
 
-    # TODO Nil values
     def obfuscate_row(row, metadata, foreign_keys)
       row.map do |column, value|
         next [column, value] if foreign_keys.include?(column)
-        type = metadata[column][:db_type]
+        next [column, nil] if rand < NULL_CHANCE if metadata[column][:allow_null]
 
+        type = metadata[column][:db_type]
         if type.end_with?('[]')
           type = type.tr('[]', '')
           array = [obfuscate_value(type), obfuscate_value(type)]
