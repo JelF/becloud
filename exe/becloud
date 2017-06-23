@@ -2,6 +2,6 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require 'becloud/db_obfuscation'
+require 'becloud/obfuscation'
 
-Becloud::DBObfuscation.obfuscate(ARGV[0])
+Becloud::Obfuscation.obfuscate(ARGV[0])

@@ -3,7 +3,7 @@
 require 'tempfile'
 require 'becloud/sequel'
 
-module Becloud::TargetUtils
+module Becloud::DBUtils
 
   class << self
 
@@ -17,7 +17,7 @@ module Becloud::TargetUtils
       run("psql #{target_db_name} < #{dump_path}")
     end
 
-    def remove_foreign_keys(db)
+    def foreign_keys(db)
       foreign_keys = {}
 
       each_foreign_key(db) do |table, foreign_key|
@@ -25,13 +25,17 @@ module Becloud::TargetUtils
         foreign_keys[table].push(*foreign_key[:columns])
         foreign_keys[foreign_key[:table]] ||= []
         foreign_keys[foreign_key[:table]].push(*foreign_key[:key])
+      end
 
+      foreign_keys.map { |table, keys| [table, keys.uniq] }.to_h
+    end
+
+    def remove_foreign_keys(db)
+      each_foreign_key(db) do |table, foreign_key|
         db.alter_table(table) do
           drop_foreign_key(foreign_key[:columns], name: foreign_key[:name])
         end
       end
-
-      foreign_keys
     end
 
     def apply_foreign_keys(reference_db, db)

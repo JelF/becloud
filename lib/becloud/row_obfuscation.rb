@@ -7,7 +7,7 @@ require 'sequel/extensions/pg_hstore'
 
 class Becloud::RowObfuscator
 
-  MAX_INTEGER         = 1_000_000
+  MAX_INTEGER         = 999_999
   DAYS_BACK_IN_TIME   = 4_000
   CHARACTER_COUNT     = 20
   DECIMAL_LEFT_DIGITS = 3
