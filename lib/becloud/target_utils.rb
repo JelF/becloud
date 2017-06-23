@@ -18,11 +18,20 @@ module Becloud::TargetUtils
     end
 
     def remove_foreign_keys(db)
+      foreign_keys = {}
+
       each_foreign_key(db) do |table, foreign_key|
+        foreign_keys[table] ||= []
+        foreign_keys[table].push(*foreign_key[:columns])
+        foreign_keys[foreign_key[:table]] ||= []
+        foreign_keys[foreign_key[:table]].push(*foreign_key[:key])
+
         db.alter_table(table) do
           drop_foreign_key(foreign_key[:columns], name: foreign_key[:name])
         end
       end
+
+      foreign_keys
     end
 
     def apply_foreign_keys(reference_db, db)

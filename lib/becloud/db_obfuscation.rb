@@ -3,12 +3,13 @@
 require 'becloud/config'
 require 'becloud/sequel'
 require 'becloud/target_utils'
+require 'becloud/row_obfuscation'
 
 # TODO Source db might change while obfuscating
 # TODO Rewind sequences after obfuscation
 # TODO Unique constraints
 
-module Becloud::Obfuscation
+module Becloud::DBObfuscation
 
   class << self
 
@@ -25,9 +26,8 @@ module Becloud::Obfuscation
 
         Becloud::Sequel.connect(target_db_name) do |target_db|
           puts 'Removing foreign keys'
-          Becloud::TargetUtils.remove_foreign_keys(target_db)
-
-          populate_target_db(source_db, target_db)
+          foreign_keys = Becloud::TargetUtils.remove_foreign_keys(target_db)
+          populate_target_db(source_db, target_db, foreign_keys)
 
           puts 'Applying foreign keys'
           Becloud::TargetUtils.apply_foreign_keys(source_db, target_db)
@@ -37,15 +37,19 @@ module Becloud::Obfuscation
 
     private
 
-    # TODO Obfuscate
+    # TODO Obfuscation config
     # TODO Memory usage
     # TODO Threads
-    # TODO Ensure foreign keys are not obfuscated (both sides)
-    def populate_target_db(source_db, target_db)
+    # TODO Raise if foreign keys are to be obfuscated (both sides)
+    def populate_target_db(source_db, target_db, foreign_keys)
       source_db.tables.each do |table|
         puts "Processing #{table}"
+        metadata = source_db.schema(table).to_h
+        table_foreign_keys = foreign_keys[table] || []
+
         source_db[table].each do |row|
-          target_db[table].insert(row)
+          obfuscated_row = Becloud::RowObfuscation.obfuscate_row(row, metadata, table_foreign_keys)
+          target_db[table].insert(obfuscated_row)
         end
       end
     end
