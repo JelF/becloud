@@ -46,9 +46,10 @@ module Becloud::DBObfuscation
         puts "Processing #{table}"
         metadata = source_db.schema(table).to_h
         table_foreign_keys = foreign_keys[table] || []
+        obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys)
 
         source_db[table].each do |row|
-          obfuscated_row = Becloud::RowObfuscation.obfuscate_row(row, metadata, table_foreign_keys)
+          obfuscated_row = obfuscator.obfuscate_row(row)
           target_db[table].insert(obfuscated_row)
         end
       end
