@@ -9,3 +9,15 @@ Style/ClassAndModuleChildren:
 
 Layout/EmptyLinesAroundModuleBody:
   Enabled: false
+
+Style/CommentAnnotation:
+  Enabled: false
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Security/Eval:
+  Enabled: false
+
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
