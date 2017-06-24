@@ -34,7 +34,8 @@ class Becloud::RowObfuscator
         attributes = columns.map { |column| [column, obfuscate_column(column, row[column])] }.to_h
         next if unique_generated_values_for(columns).include?(attributes)
 
-        unique_generated_values_for(columns) << attributes
+        # Nulls are considered unique in SQL, don't store them
+        unique_generated_values_for(columns) << attributes unless attributes.values.include?(nil)
         new_row.merge!(attributes)
         break
       end

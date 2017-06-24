@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
+require 'becloud/sequel'
+
 module Becloud::UniqueIndexResolving
 
   class << self
 
-    # TODO Support composite primary keys
     def resolve_indices(db, table)
       indices = db.indexes(table).values.select { |index| index[:unique] }
       indices = indices.map { |index| index[:columns] }
 
-      primary_key = db.primary_key(table)
-      indices.push([primary_key.to_sym]) if primary_key
+      primary_key = Becloud::Sequel.primary_key(db, table)
+      indices.push(primary_key) if primary_key
       normalize_indices(indices)
     end
 
