@@ -21,3 +21,6 @@ Security/Eval:
 
 Layout/EmptyLinesAroundBlockBody:
   Enabled: false
+
+Style/VariableNumber:
+  EnforcedStyle: snake_case

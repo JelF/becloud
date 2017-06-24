@@ -32,11 +32,11 @@ class Becloud::RowObfuscator
       # TODO Can loop forever
       loop do
         attributes = columns.map { |column| [column, obfuscate_column(column, row[column])] }.to_h
-        unless unique_generated_values_for(columns).include?(attributes)
-          unique_generated_values_for(columns) << attributes
-          new_row.merge!(attributes)
-          break
-        end
+        next if unique_generated_values_for(columns).include?(attributes)
+
+        unique_generated_values_for(columns) << attributes
+        new_row.merge!(attributes)
+        break
       end
     end
 
