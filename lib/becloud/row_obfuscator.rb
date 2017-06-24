@@ -24,6 +24,7 @@ class Becloud::RowObfuscator
 
   # TODO Refactor
   # TODO Comments
+  # TODO Generate unique values for obfuscation instead of storing previous unique values
   def obfuscate_row(row)
     new_row = {}
 

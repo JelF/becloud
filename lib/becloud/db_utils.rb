@@ -46,6 +46,10 @@ module Becloud::DBUtils
       end
     end
 
+    def reset_sequences(db)
+      db.tables.each { |table| db.reset_primary_key_sequence(table) }
+    end
+
     private
 
     def run(command)
