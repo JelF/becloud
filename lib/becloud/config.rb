@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# TODO Error on unknown code in config
+
 module Becloud::Config
 
   class << self
@@ -14,8 +16,16 @@ module Becloud::Config
       self
     end
 
+    # TODO Support rules in config
+    # TODO Always keep foreign keys (move from Becloud::Obfuscation)
     def rules(db)
-      # TODO Return rules
+      db.tables.map do |table|
+        columns = db[table].columns.map do |column|
+          rule = (strategy == :whitelist ? :anonymize : :keep)
+          [column, rule]
+        end.to_h
+        [table, columns]
+      end.to_h
     end
 
     private

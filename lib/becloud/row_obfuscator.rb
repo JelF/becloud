@@ -32,6 +32,7 @@ class Becloud::RowObfuscator
 
     unique_indices.each do |columns|
       # TODO Can loop forever
+      # TODO Kept columns don't need to go through uniqueness checks
       loop do
         attributes = columns.map { |column| [column, obfuscate_column(column, row[column])] }.to_h
         next if unique_generated_values_for(columns).include?(attributes)
@@ -59,6 +60,8 @@ class Becloud::RowObfuscator
   attr_reader :rules
 
   def obfuscate_column(column, value)
+    return value if rules[column] == :keep
+
     # TODO Foreign key set to be anonymized?
     return value if foreign_keys.include?(column)
 
