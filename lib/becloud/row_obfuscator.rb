@@ -2,7 +2,6 @@
 
 require 'faker'
 require 'json'
-require 'set'
 require 'sequel/extensions/pg_array'
 require 'sequel/extensions/pg_hstore'
 
@@ -15,48 +14,23 @@ class Becloud::RowObfuscator
   NULL_CHANCE         = 0.1
 
   def initialize(metadata, unique_indices, rules)
-    @metadata                = metadata
-    @unique_indices          = unique_indices
-    @rules                   = rules
-    # TODO Only store value hashes
-    @unique_generated_values = {}
+    @metadata       = metadata
+    @unique_indices = unique_indices
+    @rules          = rules
   end
 
-  # TODO Refactor
-  # TODO Comments
-  # TODO Generate unique values for obfuscation instead of storing previous unique values
-  # TODO Use rules
   def obfuscate_row(row)
-    new_row = {}
-
-    unique_indices.each do |columns|
-      # TODO Can loop forever
-      # TODO Kept columns don't need to go through uniqueness checks
-      loop do
-        attributes = columns.map { |column| [column, obfuscate_column(column, row[column])] }.to_h
-        next if unique_generated_values_for(columns).include?(attributes)
-
-        # Nulls are considered unique in SQL, don't store them
-        unique_generated_values_for(columns) << attributes unless attributes.values.include?(nil)
-        new_row.merge!(attributes)
-        break
-      end
-    end
-
-    (row.keys - unique_indices.flatten).each do |column|
-      new_row.merge!(column => obfuscate_column(column, row[column]))
-    end
-
-    new_row
+    row.map { |column, value| [column, obfuscate_column(column, value)] }.to_h
   end
 
   private
 
   attr_reader :metadata
   attr_reader :unique_indices
-  attr_reader :unique_generated_values
   attr_reader :rules
 
+  # TODO Support unique columns
+  # TODO Null values are unique
   def obfuscate_column(column, value)
     return value if rules[column] == :keep
     return if metadata[column][:allow_null] && rand < NULL_CHANCE
@@ -99,9 +73,5 @@ class Becloud::RowObfuscator
     else
       raise "Unsupported column type: #{type}"
     end
-  end
-
-  def unique_generated_values_for(columns)
-    unique_generated_values[columns] ||= Set.new
   end
 end

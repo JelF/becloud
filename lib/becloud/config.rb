@@ -26,12 +26,12 @@ module Becloud::Config
 
     private
 
-    # TODO Validate user input
+    # TODO Validate value is present and correct
     def source(name)
       @source_db_name = name
     end
 
-    # TODO Validate user input
+    # TODO Validate value is present and correct
     def target(name)
       @target_db_name = name
     end

@@ -44,10 +44,8 @@ module Becloud::Obfuscation
 
     private
 
-    # TODO Obfuscation config
     # TODO Threads (parallel tables? parallel table content?)
     # TODO Copy tables which do not need obfuscation
-    # TODO Unique expression indices
     def populate_target_db(source_db, target_db, rules)
       source_db.tables.each do |table|
         puts "Processing #{table}"
