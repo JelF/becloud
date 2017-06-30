@@ -8,10 +8,14 @@ module Becloud::Config
     attr_reader :target_db_name
 
     def load_config(path)
-      raise 'Obfuscation config path not specified' if !path || path.empty?
+      abort('Obfuscation config path not specified') if !path || path.empty?
       config = File.read(File.expand_path(path, Dir.pwd))
       eval(config)
       self
+    end
+
+    def rules(db)
+      # TODO Return rules
     end
 
     private
@@ -24,6 +28,16 @@ module Becloud::Config
     # TODO Validate user input
     def target(name)
       @target_db_name = name
+    end
+
+    def strategy(strategy = nil)
+      return @strategy || :whitelist if strategy == nil
+
+      unless %i(whitelist blacklist).include?(strategy)
+        abort('Strategy should be one of :whitelist or :blacklist')
+      end
+
+      @strategy = strategy
     end
   end
 end

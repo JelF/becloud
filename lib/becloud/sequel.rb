@@ -4,7 +4,8 @@ require 'sequel'
 
 module Becloud::Sequel
 
-  BATCH_SIZE = 1_000
+  # TODO Optimal value?
+  BATCH_SIZE = 10_000
 
   class << self
 

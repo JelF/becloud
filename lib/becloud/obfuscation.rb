@@ -29,7 +29,7 @@ module Becloud::Obfuscation
           puts 'Removing foreign keys'
           Becloud::DBUtils.remove_foreign_keys(target_db)
 
-          populate_target_db(source_db, target_db)
+          populate_target_db(source_db, target_db, config.rules(source_db))
 
           puts 'Applying foreign keys'
           Becloud::DBUtils.apply_foreign_keys(source_db, target_db)
@@ -50,16 +50,17 @@ module Becloud::Obfuscation
     # TODO Foreign key passing is not required if raising on foreign key obfuscation requests?
     # TODO Copy tables which do not need obfuscation
     # TODO Unique expression indices
-    def populate_target_db(source_db, target_db)
+    def populate_target_db(source_db, target_db, rules)
       foreign_keys = Becloud::DBUtils.foreign_keys(source_db)
 
       source_db.tables.each do |table|
         puts "Processing #{table}"
 
-        metadata = source_db.schema(table).to_h
-        table_foreign_keys = foreign_keys[table] || []
+        metadata             = source_db.schema(table).to_h
+        table_rules          = rules[table]
+        table_foreign_keys   = foreign_keys[table] || []
         table_unique_indices = Becloud::UniqueIndexResolving.resolve_indices(source_db, table)
-        obfuscator = Becloud::RowObfuscator.new(metadata, table_foreign_keys, table_unique_indices)
+        obfuscator           = Becloud::RowObfuscator.new(metadata, table_foreign_keys, table_unique_indices, table_rules)
 
         Becloud::Sequel.read_in_batches(source_db, table) do |batch|
           obfuscated_rows = batch.map { |row| obfuscator.obfuscate_row(row) }

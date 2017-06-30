@@ -14,10 +14,11 @@ class Becloud::RowObfuscator
   DECIMAL_LEFT_DIGITS = 3
   NULL_CHANCE         = 0.1
 
-  def initialize(metadata, foreign_keys, unique_indices)
+  def initialize(metadata, foreign_keys, unique_indices, rules)
     @metadata                = metadata
     @foreign_keys            = foreign_keys
     @unique_indices          = unique_indices
+    @rules                   = rules
     # TODO Only store value hashes
     @unique_generated_values = {}
   end
@@ -25,6 +26,7 @@ class Becloud::RowObfuscator
   # TODO Refactor
   # TODO Comments
   # TODO Generate unique values for obfuscation instead of storing previous unique values
+  # TODO Use rules
   def obfuscate_row(row)
     new_row = {}
 
@@ -54,9 +56,12 @@ class Becloud::RowObfuscator
   attr_reader :foreign_keys
   attr_reader :unique_indices
   attr_reader :unique_generated_values
+  attr_reader :rules
 
   def obfuscate_column(column, value)
+    # TODO Foreign key set to be anonymized?
     return value if foreign_keys.include?(column)
+
     return if metadata[column][:allow_null] && rand < NULL_CHANCE
 
     type = metadata[column][:db_type]

@@ -53,7 +53,7 @@ module Becloud::DBUtils
     private
 
     def run(command)
-      raise "Error while executing: #{command}" unless system(command)
+      abort("Error while executing: #{command}") unless system(command)
     end
 
     def each_foreign_key(db)
