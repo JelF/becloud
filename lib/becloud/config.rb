@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'becloud/db_utils'
+
 # TODO Error on unknown code in config
 
 module Becloud::Config
@@ -17,13 +19,9 @@ module Becloud::Config
     end
 
     # TODO Support rules in config
-    # TODO Always keep foreign keys (move from Becloud::Obfuscation)
     def rules(db)
       db.tables.map do |table|
-        columns = db[table].columns.map do |column|
-          rule = (strategy == :whitelist ? :anonymize : :keep)
-          [column, rule]
-        end.to_h
+        columns = db[table].columns.map { |column| [column, rule(db, table, column)] }.to_h
         [table, columns]
       end.to_h
     end
@@ -48,6 +46,19 @@ module Becloud::Config
       end
 
       @strategy = strategy
+    end
+
+    def foreign_keys(db)
+      @foreign_keys ||= Becloud::DBUtils.foreign_keys(db)
+    end
+
+    def rule(db, table, column)
+      table_foreign_keys = foreign_keys(db)[table] || []
+      if table_foreign_keys.include?(column) || strategy == :blacklist
+        :keep
+      else
+        :anonymize
+      end
     end
   end
 end
