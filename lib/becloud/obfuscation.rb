@@ -52,10 +52,10 @@ module Becloud::Obfuscation
       source_db.tables.each do |table|
         puts "Processing #{table}"
 
-        metadata             = source_db.schema(table).to_h
-        table_rules          = rules[table]
-        table_unique_indices = Becloud::UniqueIndexResolving.resolve_indices(source_db, table)
-        obfuscator           = Becloud::RowObfuscator.new(metadata, table_unique_indices, table_rules)
+        metadata       = source_db.schema(table).to_h
+        table_rules    = rules[table]
+        unique_indices = Becloud::UniqueIndexResolving.resolve_indices(source_db, table)
+        obfuscator     = Becloud::RowObfuscator.new(metadata, unique_indices, table_rules)
 
         Becloud::Sequel.read_in_batches(source_db, table) do |batch|
           obfuscated_rows = batch.map { |row| obfuscator.obfuscate_row(row) }

@@ -2,8 +2,6 @@
 
 require 'becloud/db_utils'
 
-# TODO Error on unknown code in config
-
 module Becloud::Config
 
   class << self

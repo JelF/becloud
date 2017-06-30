@@ -24,3 +24,10 @@ Layout/EmptyLinesAroundBlockBody:
 
 Style/VariableNumber:
   EnforcedStyle: snake_case
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i': '()'
+
+Style/NilComparison:
+  Enabled: false
