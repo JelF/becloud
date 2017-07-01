@@ -1,7 +1,7 @@
 module Becloud::ValueObfuscation::TimestampWithoutTimeZone
 
   # TODO Implement
-  def self.obfuscate
+  def self.obfuscate(_seed)
     Time.now
   end
 end
