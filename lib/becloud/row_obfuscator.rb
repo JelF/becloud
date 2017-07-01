@@ -44,8 +44,8 @@ class Becloud::RowObfuscator
 
     if unique_indices.include?(column)
       seeds[column] ||= 0
-      seeds[column] += 1
       seed          = seeds[column]
+      seeds[column] += 1
     else
       seed = nil
     end
