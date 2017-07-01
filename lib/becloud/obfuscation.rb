@@ -7,6 +7,7 @@ require 'becloud/row_obfuscator'
 require 'becloud/unique_index_resolving'
 
 # TODO Source db might change while obfuscating
+# TODO MySQL support
 
 module Becloud::Obfuscation
 
@@ -16,16 +17,15 @@ module Becloud::Obfuscation
       start_time     = Time.now
       config         = Becloud::Config.load_config(config_path)
       source_db_name = config.source_db_name
+      target_db_name = config.target_db_name
 
-      # TODO Support all source db connection params (host, username, password, etc...)
+      puts 'Resetting schema'
+      Becloud::DBUtils.reset_target_schema(source_db_name, target_db_name)
+
+      # TODO Support all source and target db connection params (host, username, password, etc...)
       Becloud::Sequel.connect(source_db_name) do |source_db|
-        target_db_name = config.target_db_name
-
-        puts 'Resetting schema'
-        Becloud::DBUtils.reset_target_schema(source_db_name, target_db_name)
-
-        # TODO Support all target db connection params (host, username, password, etc...)
         Becloud::Sequel.connect(target_db_name) do |target_db|
+
           puts 'Removing foreign keys'
           Becloud::DBUtils.remove_foreign_keys(target_db)
 

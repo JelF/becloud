@@ -48,6 +48,7 @@ class Becloud::RowObfuscator
   # TODO Support varchar with upper limit
   # TODO Support numeric with parameters
   # TODO Support all postgres types
+  # TODO Rework obfuscation of all types
   def obfuscate_value(type)
     case type
     when 'integer'

@@ -9,6 +9,7 @@ module Becloud::Config
     attr_reader :source_db_name
     attr_reader :target_db_name
 
+    # TODO Eval config in a separate object context
     def load_config(path)
       abort('Obfuscation config path not specified') if !path || path.empty?
       config = File.read(File.expand_path(path, Dir.pwd))
