@@ -9,7 +9,7 @@ require 'becloud/unique_index_resolving'
 # TODO Source db might change while obfuscating
 # TODO MySQL support
 
-module Becloud::Obfuscation
+module Becloud::DBObfuscation
 
   class << self
 

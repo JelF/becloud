@@ -1,0 +1,2 @@
+module Becloud::ValueObfuscation
+end
