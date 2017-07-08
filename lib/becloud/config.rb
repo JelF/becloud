@@ -41,7 +41,7 @@ module Becloud::Config
       return @strategy || :whitelist if strategy == nil
 
       unless %i(whitelist blacklist).include?(strategy)
-        abort('Strategy should be one of :whitelist or :blacklist')
+        raise(StandardError, 'Strategy should be one of :whitelist or :blacklist', caller(1))
       end
 
       @strategy = strategy
