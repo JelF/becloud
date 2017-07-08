@@ -12,8 +12,8 @@ module Becloud::Config
     # TODO Eval config in a separate object context
     def load_config(path)
       abort('Obfuscation config path not specified') if !path || path.empty?
-      config = File.read(File.expand_path(path, Dir.pwd))
-      eval(config)
+      config_path = File.expand_path(path, Dir.pwd)
+      instance_eval(File.read(config_path), config_path)
       self
     end
 
